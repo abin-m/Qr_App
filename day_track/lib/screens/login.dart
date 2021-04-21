@@ -2,6 +2,7 @@ import 'package:day_track/screens/dashboard_user.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:day_track/screens/dashboard_pages.dart';
 
 class Loginpage extends StatefulWidget {
   static const String id = 'Login_page';
@@ -157,6 +158,12 @@ class _LoginpageState extends State<Loginpage> {
                     elevation: 2,
                     height: 40,
                   ),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, ForgotPassword.id);
+                  },
+                  child: Text('Forgot Password'),
                 )
               ],
             ),
