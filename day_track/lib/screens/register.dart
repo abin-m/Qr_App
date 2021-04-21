@@ -73,6 +73,32 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   });
                 },
                 decoration: new InputDecoration(
+                  labelText: 'Full Name',
+                  fillColor: Colors.white,
+                  border: new OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: new BorderSide(),
+                  ),
+                ),
+                validator: (val) {
+                  if (val.length == 0) {
+                    return "Email cannot be empty";
+                  } else {
+                    return null;
+                  }
+                },
+                keyboardType: TextInputType.text,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              TextFormField(
+                onChanged: (value) {
+                  setState(() {
+                    email = value;
+                  });
+                },
+                decoration: new InputDecoration(
                   labelText: ' Email Address',
                   fillColor: Colors.white,
                   border: new OutlineInputBorder(

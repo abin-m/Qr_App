@@ -1,4 +1,6 @@
-import 'package:day_track/screens/scanhistory.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:day_track/screens/dashboard_pages.dart';
+
 import 'package:flutter/material.dart';
 
 class UserDashboard extends StatefulWidget {
@@ -10,7 +12,9 @@ class UserDashboard extends StatefulWidget {
 class _UserDashboardState extends State<UserDashboard> {
   List<BottomNavigationBarItem> _items;
   String value = "";
-  int index = 0;
+  // int index = 0;
+  String qrCodeResult = "";
+  int selectedIndex = 0;
   @override
   void initState() {
     _items = new List();
@@ -22,56 +26,21 @@ class _UserDashboardState extends State<UserDashboard> {
         icon: new Icon(Icons.logout), title: new Text('Log Out')));
   }
 
+  var _pages = [ScanQr(), History()];
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       bottomNavigationBar: new BottomNavigationBar(
         items: _items,
         fixedColor: Colors.black,
-        currentIndex: index,
+        currentIndex: selectedIndex,
         onTap: (index) {
-          switch (index) {
-            case 1:
-              Navigator.pushNamed(context, ScanHistory.id);
-              break;
-          }
+          setState(() {
+            selectedIndex = index;
+          });
         },
       ),
-      body: SingleChildScrollView(
-        child: new Column(
-          children: <Widget>[
-            SizedBox(
-              height: 120,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(29.0),
-              child: Image(
-                image: AssetImage('images/qr.png'),
-                alignment: Alignment.topLeft,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(22.0),
-              child: new MaterialButton(
-                onPressed: () {
-                  // Navigator.pushNamed(context, RegistrationPage.id);
-                },
-                minWidth: 130,
-                child: Text(
-                  ' Scan QR ',
-                  style: TextStyle(fontSize: 17),
-                ),
-                textColor: Colors.white,
-                color: Colors.black87,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-                elevation: 2,
-                height: 55,
-              ),
-            )
-          ],
-        ),
-      ),
+      body: _pages[selectedIndex],
     );
   }
 }

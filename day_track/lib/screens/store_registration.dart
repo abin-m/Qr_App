@@ -210,7 +210,7 @@ class _StoreregistrationState extends State<Storeregistration> {
                 padding: const EdgeInsets.all(28.0),
                 child: new MaterialButton(
                   onPressed: () {
-                    if (password == password2 && storename.length != 0) {
+                    if (password == password2) {
                       Navigator.pushNamed(context, Loginpage.id);
                     } else {
                       _showAlert(context, 'Passwords are not same');
