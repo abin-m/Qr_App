@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(new MaterialApp(
     debugShowCheckedModeBanner: false,
-    initialRoute: StoreDashboard.id,
+    initialRoute: Welcomescreen.id,
     routes: {
       Welcomescreen.id: (context) => Welcomescreen(),
       Loginpage.id: (context) => Loginpage(),
