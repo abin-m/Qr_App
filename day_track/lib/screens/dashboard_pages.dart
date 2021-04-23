@@ -1,7 +1,7 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//**************These Pages are used in the bottumnavigation bar*********************** */
+//**************These Pages are used in the bottom navigation bar*********************** */
 
 final auth = FirebaseAuth.instance;
 
