@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:day_track/screens/dashboard_pages.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Loginpage extends StatefulWidget {
   static const String id = 'Login_page';
@@ -11,10 +12,13 @@ class Loginpage extends StatefulWidget {
 }
 
 class _LoginpageState extends State<Loginpage> {
+  SharedPreferences localStorage;
   final auth = FirebaseAuth.instance;
+
   String email;
   String password;
   bool showspinner = false;
+
   Future _showAlert(BuildContext context, String message) async {
     return showDialog(
         context: context,
@@ -28,6 +32,18 @@ class _LoginpageState extends State<Loginpage> {
                 child: new Text('Cancel'))
           ],
         ));
+  }
+
+  //SHARED PREFERENCES INITIALIZATION
+  Future init() async {
+    localStorage = await SharedPreferences.getInstance();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    init();
   }
 
   @override
@@ -136,7 +152,15 @@ class _LoginpageState extends State<Loginpage> {
                         final user = await auth.signInWithEmailAndPassword(
                             email: email, password: password);
                         if (user != null) {
+                          final FirebaseUser user = await auth.currentUser();
+                          final userid = user.uid;
                           Navigator.pushNamed(context, UserDashboard.id);
+                          localStorage.setString('Email', email);
+                          var obtainedEmail = localStorage.getString('Email');
+                          print("obtained Email:${obtainedEmail}");
+                          // localStorage.setString('password', password);
+                          // localStorage.setString('uid', userid);
+
                         }
                       } catch (e) {
                         _showAlert(context, 'You are not Registered');
@@ -173,3 +197,5 @@ class _LoginpageState extends State<Loginpage> {
     );
   }
 }
+
+// Saving data to sharedmemory
