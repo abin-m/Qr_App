@@ -15,7 +15,7 @@ class _StoreregistrationState extends State<Storeregistration> {
   String storename;
   String storeloc;
 
-  Future _showAlert(BuildContext context, String message) async {
+  Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
         context: context,
         child: new AlertDialog(
@@ -25,7 +25,7 @@ class _StoreregistrationState extends State<Storeregistration> {
           actions: <Widget>[
             new FlatButton(
                 onPressed: () => Navigator.pop(context),
-                child: new Text('Correct password'))
+                child: new Text(action))
           ],
         ));
   }
@@ -210,10 +210,19 @@ class _StoreregistrationState extends State<Storeregistration> {
                 padding: const EdgeInsets.all(28.0),
                 child: new MaterialButton(
                   onPressed: () {
-                    if (password == password2) {
-                      Navigator.pushNamed(context, Loginpage.id);
+                    if (email == null ||
+                        contactnum == "" ||
+                        storename == "" ||
+                        storeloc == "") {
+                      _showAlert(context, 'Enter all the fields', 'Check Now');
+                      print("not entered");
                     } else {
-                      _showAlert(context, 'Passwords are not same');
+                      if (password == password2) {
+                        Navigator.pushNamed(context, Loginpage.id);
+                      } else {
+                        _showAlert(context, 'Passwords are not same',
+                            'Check password');
+                      }
                     }
                   },
                   height: 46,

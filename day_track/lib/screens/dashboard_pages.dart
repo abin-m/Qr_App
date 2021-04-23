@@ -74,6 +74,20 @@ class _HistoryState extends State<History> {
 }
 
 // For Store panel
+//
+//
+// Logout
+class LogOut extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.cyan,
+      child: Column(
+        children: <Widget>[Text("Logout Page")],
+      ),
+    );
+  }
+}
 
 // for VISITORS COUNT
 

@@ -12,8 +12,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String email;
   String password;
   String password2;
+  String contactnum;
 
-  Future _showAlert(BuildContext context, String message) async {
+  Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
         context: context,
         child: new AlertDialog(
@@ -23,7 +24,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           actions: <Widget>[
             new FlatButton(
                 onPressed: () => Navigator.pop(context),
-                child: new Text('Correct password'))
+                child: new Text(action))
           ],
         ));
   }
@@ -121,7 +122,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               TextFormField(
                 onChanged: (value) {
                   setState(() {
-                    email = value;
+                    contactnum = value;
                   });
                 },
                 decoration: new InputDecoration(
@@ -193,10 +194,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 padding: const EdgeInsets.all(28.0),
                 child: new MaterialButton(
                   onPressed: () {
-                    if (password == password2) {
-                      Navigator.pushNamed(context, Loginpage.id);
+                    if (password2 == "" ||
+                        password == "" ||
+                        email == "" ||
+                        contactnum == "") {
+                      _showAlert(context, 'Enter All the fields', 'Ok');
                     } else {
-                      _showAlert(context, 'Passwords are not same');
+                      if (password == password2) {
+                        Navigator.pushNamed(context, Loginpage.id);
+                      } else {
+                        _showAlert(
+                            context, 'Passwords are not same', 'Check Now');
+                      }
                     }
                   },
                   height: 46,

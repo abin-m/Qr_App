@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 SharedPreferences localStorage;
 String finalpass;
-var initialRoot = Welcomescreen.id;
+var initialRoot = Storeregistration.id;
 // shared preferences initialization
 void initState() {
   init();
@@ -20,9 +20,11 @@ Future init() async {
   localStorage = await SharedPreferences.getInstance();
   var obtainedEmail = localStorage.getString('Email');
   print('Obtained passs:?$obtainedEmail');
+
   finalpass = obtainedEmail;
   print(finalpass);
   if (finalpass == null) {
+    print("hello");
     initialRoot = Loginpage.id;
   } else {
     initialRoot = UserDashboard.id;

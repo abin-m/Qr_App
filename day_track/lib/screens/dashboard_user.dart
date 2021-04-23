@@ -26,7 +26,7 @@ class _UserDashboardState extends State<UserDashboard> {
         icon: new Icon(Icons.logout), title: new Text('Log Out')));
   }
 
-  var _pages = [ScanQr(), History()];
+  var _pages = [ScanQr(), History(), LogOut()];
   @override
   Widget build(BuildContext context) {
     return new Scaffold(

@@ -15,19 +15,23 @@ class _StoreDashboardState extends State<StoreDashboard> {
   @override
   void initState() {
     _items = new List();
+
     _items.add(new BottomNavigationBarItem(
         icon: new Icon(Icons.person_search), title: new Text('Visitors')));
     _items.add(new BottomNavigationBarItem(
         icon: new Icon(Icons.date_range), title: new Text('Search by date')));
     _items.add(new BottomNavigationBarItem(
         icon: new Icon(Icons.qr_code), title: new Text('Your QR')));
+    _items.add(new BottomNavigationBarItem(
+        icon: new Icon(Icons.logout), title: new Text('Logout')));
   }
 
-  var _pages = [VistorsDetails(), SearchByDate(), ShowQRCode()];
+  var _pages = [VistorsDetails(), SearchByDate(), ShowQRCode(), LogOut()];
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       bottomNavigationBar: new BottomNavigationBar(
+        unselectedItemColor: Colors.black54,
         items: _items,
         fixedColor: Colors.black,
         currentIndex: index,
@@ -37,7 +41,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
           });
         },
       ),
-      body: _pages[index],
+      body: SingleChildScrollView(child: _pages[index]),
     );
   }
 }
