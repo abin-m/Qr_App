@@ -1,9 +1,16 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 //**************These Pages are used in the bottom navigation bar*********************** */
 
 final auth = FirebaseAuth.instance;
+final _firestore = Firestore.instance;
+Future getUId() async {
+  final FirebaseUser user = await auth.currentUser();
+  final userid = user.uid;
+  return userid;
+}
 
 //for Qr scaning in Userdashboard
 class ScanQr extends StatefulWidget {
@@ -78,12 +85,41 @@ class _HistoryState extends State<History> {
 //
 // Logout
 class LogOut extends StatelessWidget {
+  var kuid = getUId();
+  String userName;
+  String joinedOn;
+  Future getDetails() {
+    _firestore
+        .collection('user_details')
+        .document(kuid.toString())
+        .get()
+        .then((value) {
+      userName = value.data['name'];
+    });
+  }
+
+  initState() {
+    getDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.cyan,
-      child: Column(
-        children: <Widget>[Text("Logout Page")],
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CircleAvatar(
+              backgroundColor: Colors.green,
+              radius: 60,
+              backgroundImage: AssetImage('images/person.png'),
+            ),
+            Text("Logout Page\n$userName"),
+          ],
+        ),
       ),
     );
   }
@@ -120,6 +156,8 @@ class _SearchByDateState extends State<SearchByDate> {
 //Show Qr Code
 
 class ShowQRCode extends StatefulWidget {
+  final auth = FirebaseAuth.instance;
+  final _firestore = Firestore.instance;
   @override
   _ShowQRCodeState createState() => _ShowQRCodeState();
 }
@@ -127,7 +165,10 @@ class ShowQRCode extends StatefulWidget {
 class _ShowQRCodeState extends State<ShowQRCode> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+    );
   }
 }
 

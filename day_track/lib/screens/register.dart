@@ -1,6 +1,9 @@
 import 'package:day_track/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; //for date format
 
 class RegistrationPage extends StatefulWidget {
   static const String id = 'RegistrationPage';
@@ -13,6 +16,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String password;
   String password2;
   String contactnum;
+  String name;
+  final auth = FirebaseAuth.instance;
+  final _firestore = Firestore.instance;
 
   Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
@@ -29,6 +35,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ));
   }
 
+  String now;
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -70,7 +77,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               TextFormField(
                 onChanged: (value) {
                   setState(() {
-                    email = value;
+                    name = value;
                   });
                 },
                 decoration: new InputDecoration(
@@ -207,6 +214,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             context, 'Passwords are not same', 'Check Now');
                       }
                     }
+                    createUser();
                   },
                   height: 46,
                   minWidth: 130,
@@ -226,5 +234,34 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
       ),
     );
+  }
+
+  Future createUser() async {
+    try {
+      final user = await auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      if (user != null) {
+        final FirebaseUser user = await auth.currentUser();
+        final userid = user.uid;
+
+        // saving data to firebase
+        //
+        // _firestore.collection('store_details').document(userid).setData({
+
+        // });
+        _firestore.collection('user_details').document(userid).setData({
+          'email': email,
+          'contact_no': contactnum,
+          'name': name,
+          'joinedon': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
+        });
+        _showAlert(context, 'Succesfully Registered ', 'Ok');
+
+        Navigator.pushNamed(context, Loginpage.id);
+      }
+    } catch (e) {
+      _showAlert(
+          context, 'Allready Registered.\n Use another email id', 'Retry Now');
+    }
   }
 }

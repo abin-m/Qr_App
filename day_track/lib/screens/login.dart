@@ -1,9 +1,11 @@
+import 'package:day_track/screens/dashboard_admin.dart';
 import 'package:day_track/screens/dashboard_user.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:day_track/screens/dashboard_pages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Loginpage extends StatefulWidget {
   static const String id = 'Login_page';
@@ -14,6 +16,7 @@ class Loginpage extends StatefulWidget {
 class _LoginpageState extends State<Loginpage> {
   SharedPreferences localStorage;
   final auth = FirebaseAuth.instance;
+  final _firestore = Firestore.instance;
 
   String email;
   String password;
@@ -154,7 +157,22 @@ class _LoginpageState extends State<Loginpage> {
                         if (user != null) {
                           final FirebaseUser user = await auth.currentUser();
                           final userid = user.uid;
-                          Navigator.pushNamed(context, UserDashboard.id);
+                          try {
+                            DocumentSnapshot snap = await _firestore
+                                .collection('store_details')
+                                .document(userid)
+                                .get();
+
+                            if (snap.exists) {
+                              print('nadakkula mwone');
+                              Navigator.pushNamed(context, StoreDashboard.id);
+                            } else {
+                              Navigator.pushNamed(context, UserDashboard.id);
+                            }
+                          } catch (e) {
+                            print(e);
+                          }
+                          // Navigator.pushNamed(context, UserDashboard.id);
                           localStorage.setString('Email', email);
                           var obtainedEmail = localStorage.getString('Email');
                           print("obtained Email:${obtainedEmail}");

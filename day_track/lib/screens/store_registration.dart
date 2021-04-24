@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class Storeregistration extends StatefulWidget {
   static const String id = "Storeregistration";
@@ -268,6 +269,7 @@ class _StoreregistrationState extends State<Storeregistration> {
       if (user != null) {
         final FirebaseUser user = await auth.currentUser();
         final userid = user.uid;
+        String now;
 
         // saving data to firebase
         //
@@ -279,6 +281,7 @@ class _StoreregistrationState extends State<Storeregistration> {
           'contact_no': contactnum,
           'store_name': storename,
           'store_loc': storeloc,
+          'joinedon': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
         });
         _showAlert(context, 'Succesfully Registered ', 'Ok');
         setState(() {
