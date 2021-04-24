@@ -164,7 +164,7 @@ class _LoginpageState extends State<Loginpage> {
                                 .get();
 
                             if (snap.exists) {
-                              print('nadakkula mwone');
+                              // print('nadakkula mwone');
                               Navigator.pushNamed(context, StoreDashboard.id);
                             } else {
                               Navigator.pushNamed(context, UserDashboard.id);

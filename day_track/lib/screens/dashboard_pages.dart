@@ -1,4 +1,5 @@
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:day_track/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,11 +7,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 final auth = FirebaseAuth.instance;
 final _firestore = Firestore.instance;
-Future getUId() async {
-  final FirebaseUser user = await auth.currentUser();
-  final userid = user.uid;
-  return userid;
-}
+// Future getUId() async {
+//   final FirebaseUser user = await auth.currentUser();
+//   final userid = user.uid;
+//   kuid = userid;
+//   print(userid);
+// }
+
+// String kuid;
 
 //for Qr scaning in Userdashboard
 class ScanQr extends StatefulWidget {
@@ -80,25 +84,33 @@ class _HistoryState extends State<History> {
   }
 }
 
-// For Store panel
-//
-//
-// Logout
-class LogOut extends StatelessWidget {
-  var kuid = getUId();
-  String userName;
-  String joinedOn;
-  Future getDetails() {
-    _firestore
-        .collection('user_details')
-        .document(kuid.toString())
-        .get()
-        .then((value) {
-      userName = value.data['name'];
+class LogOut extends StatefulWidget {
+  @override
+  _LogOutState createState() => _LogOutState();
+}
+
+class _LogOutState extends State<LogOut> {
+  String userName = "";
+  String joinedOn = "";
+  String kUid;
+  Future getDetails() async {
+    final FirebaseUser user = await auth.currentUser();
+    final userid = user.uid;
+    _firestore.collection('user_details').document(userid).get().then((value) {
+      setState(() {
+        kUid = userid;
+        userName = value.data['name'];
+        joinedOn = value.data['joinedon'];
+      });
+      print(value);
+      print(userName);
     });
   }
 
-  initState() {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     getDetails();
   }
 
@@ -113,17 +125,169 @@ class LogOut extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             CircleAvatar(
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.blueGrey,
               radius: 60,
               backgroundImage: AssetImage('images/person.png'),
             ),
-            Text("Logout Page\n$userName"),
+            Text(
+              userName,
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
+            ),
+            Text("Joined On : $joinedOn"),
+            // FloatingActionButton(onPressed: () {}),
+            //
+            SizedBox(
+              height: 53,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(28.0),
+              child: new MaterialButton(
+                onPressed: () {
+                  auth.signOut();
+                  Navigator.pushNamed(context, Loginpage.id);
+                },
+                height: 46,
+                minWidth: 130,
+                child: Text(
+                  'Log out',
+                  style: TextStyle(fontSize: 17),
+                ),
+                textColor: Colors.white,
+                color: Colors.black87,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                elevation: 2,
+              ),
+            )
           ],
         ),
       ),
     );
   }
 }
+
+// logout for admin
+class StoreLogOut extends StatefulWidget {
+  @override
+  _StoreLogOutState createState() => _StoreLogOutState();
+}
+
+class _StoreLogOutState extends State<StoreLogOut> {
+  String userName = "";
+  String joinedOn = "";
+  String kUid;
+  Future getDetails() async {
+    final FirebaseUser user = await auth.currentUser();
+    final userid = user.uid;
+    _firestore.collection('store_details').document(userid).get().then((value) {
+      setState(() {
+        kUid = userid;
+        userName = value.data['store_name'];
+        joinedOn = value.data['joinedon'];
+      });
+      print(value);
+      print(userName);
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getDetails();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CircleAvatar(
+              backgroundColor: Colors.blueGrey,
+              radius: 60,
+              backgroundImage: AssetImage('images/person.png'),
+            ),
+            Text(
+              userName,
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
+            ),
+            Text("Joined On : $joinedOn"),
+            // FloatingActionButton(onPressed: () {}),
+            //
+            SizedBox(
+              height: 53,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(28.0),
+              child: new MaterialButton(
+                onPressed: () {
+                  auth.signOut();
+                  Navigator.pushNamed(context, Loginpage.id);
+                },
+                height: 46,
+                minWidth: 130,
+                child: Text(
+                  'Log out',
+                  style: TextStyle(fontSize: 17),
+                ),
+                textColor: Colors.white,
+                color: Colors.black87,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                elevation: 2,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+// For Store panel
+//
+//
+// Logout
+// class LogOut extends StatelessWidget {
+//   String userName = "poda";
+//   String joinedOn;
+//   // ignore: missing_return
+//   Future getDetails() async {
+//     final FirebaseUser user = await auth.currentUser();
+//     final userid = user.uid;
+//     _firestore.collection('user_details').document(userid).get().then((value) {
+//       userName = value.data['name'];
+//       print(userName);
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // return Center(
+//     //   child: Container(
+//     //     height: MediaQuery.of(context).size.height,
+//     //     width: MediaQuery.of(context).size.width,
+//     //     child: Column(
+//     //       // crossAxisAlignment: CrossAxisAlignment.center,
+//     //       mainAxisAlignment: MainAxisAlignment.center,
+//     //       children: <Widget>[
+
+//     //         CircleAvatar(
+//     //           backgroundColor: Colors.green,
+//     //           radius: 60,
+//     //           backgroundImage: AssetImage('images/person.png'),
+//     //         ),
+//     //         Text("Logout Page\n"),
+//     //       ],
+//     //     ),
+//     //   ),
+//     // );
+//   }
+// }
 
 // for VISITORS COUNT
 

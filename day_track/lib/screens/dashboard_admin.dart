@@ -26,7 +26,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
         icon: new Icon(Icons.logout), title: new Text('Logout')));
   }
 
-  var _pages = [VistorsDetails(), SearchByDate(), ShowQRCode(), LogOut()];
+  var _pages = [VistorsDetails(), SearchByDate(), ShowQRCode(), StoreLogOut()];
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
