@@ -1,8 +1,14 @@
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:day_track/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 //**************These Pages are used in the bottom navigation bar*********************** */
 
 final auth = FirebaseAuth.instance;
@@ -318,7 +324,18 @@ class _SearchByDateState extends State<SearchByDate> {
 }
 
 //Show Qr Code
-
+// Future _showAlert(BuildContext context, String message,String action) async {
+//     return showDialog(
+//         context: context,
+//         child: new AlertDialog(
+//           shape:
+//               RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
+//           title: new Text(message),
+//           actions: <Widget>[
+//             new FlatButton(
+//                 onPressed: () => Navigator.pop(context), child: new Text(action))
+//           ],
+//         ));
 class ShowQRCode extends StatefulWidget {
   final auth = FirebaseAuth.instance;
   final _firestore = Firestore.instance;
@@ -327,11 +344,184 @@ class ShowQRCode extends StatefulWidget {
 }
 
 class _ShowQRCodeState extends State<ShowQRCode> {
+  String userName = "";
+  String storeloc = "";
+  String kUid = "";
+  Future _showAlert(BuildContext context, String message, String action) async {
+    return showDialog(
+        context: context,
+        child: new AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
+          title: new Text(message),
+          actions: <Widget>[
+            new FlatButton(
+                onPressed: () => Navigator.pop(context),
+                child: new Text(action))
+          ],
+        ));
+  }
+
+  _save() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    } else {
+      final directory = (await getApplicationDocumentsDirectory())
+          .path; //from path_provide package
+      String fileName = "storeQRcode";
+      String path = '/storage/emulated/0/Downloads/';
+
+      screenshotController.captureAndSave(
+          path, //set path where screenshot will be saved
+          fileName: fileName);
+    }
+  }
+
+  Future getDetails() async {
+    final FirebaseUser user = await auth.currentUser();
+    final userid = user.uid;
+    _firestore.collection('store_details').document(userid).get().then((value) {
+      setState(() {
+        kUid = userid;
+        userName = value.data['store_name'];
+        storeloc = value.data['store_loc'];
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getDetails();
+  }
+
+  int _counter = 0;
+  Uint8List _imageFile;
+  ScreenshotController screenshotController = ScreenshotController();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 30,
+            ),
+            // Text(
+            //   "Your QR",
+            //   textAlign: TextAlign.left,
+            //   style: TextStyle(
+            //     fontSize: 35,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            Screenshot(
+              controller: screenshotController,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Card(
+                  elevation: 9,
+                  child: Container(
+                    color: Colors.white70,
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Text(
+                            "Break the chain",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(85.0),
+                          child: QrImage(
+                            data: kUid,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Day_Track",
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "Scan the above QR and enter your details",
+                          style: TextStyle(
+                            fontSize: 14,
+                            // fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Text(
+                          "Happy shopping with $userName",
+                          style: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w300),
+                        ),
+                        SizedBox(
+                          height: 25,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(28.0),
+              child: new MaterialButton(
+                onPressed: () {
+                  try {
+                    screenshotController
+                        .capture()
+                        .then((Uint8List image) async {
+                      setState(() {
+                        _imageFile = image;
+                      });
+                      final result = await ImageGallerySaver.saveImage(image);
+                      // print("captured");
+                      // print(result);
+                      _save();
+                    }).catchError((onError) {
+                      print(onError);
+                    });
+                    _showAlert(
+                        context,
+                        "File saved on your Gallery,take a print out of that and paste that at your entrance",
+                        "Ok");
+                  } catch (e) {
+                    _showAlert(context, "An error occured ", "Try again");
+                  }
+
+                  // auth.signOut();
+                  // Navigator.pushNamed(context, Loginpage.id);
+                },
+                height: 46,
+                minWidth: 130,
+                child: Text(
+                  'Download Qrcode',
+                  style: TextStyle(fontSize: 17),
+                ),
+                textColor: Colors.white,
+                color: Colors.black87,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                elevation: 2,
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }

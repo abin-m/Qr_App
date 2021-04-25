@@ -14,6 +14,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
   int index = 0;
   @override
   void initState() {
+    ShowQRCode();
     _items = new List();
 
     _items.add(new BottomNavigationBarItem(
@@ -41,7 +42,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
           });
         },
       ),
-      body: SingleChildScrollView(child: _pages[index]),
+      body: SafeArea(child: SingleChildScrollView(child: _pages[index])),
     );
   }
 }
