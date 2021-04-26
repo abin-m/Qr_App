@@ -43,6 +43,7 @@ void main() {
       UserDashboard.id: (context) => UserDashboard(),
       StoreDashboard.id: (context) => StoreDashboard(),
       ForgotPassword.id: (context) => ForgotPassword(),
+      StoreCkechIn.id: (context) => StoreCkechIn(),
     },
   ));
 }

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:day_track/screens/register.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -21,6 +22,7 @@ final _firestore = Firestore.instance;
 // }
 
 // String kuid;
+String qrData = "";
 
 //for Qr scaning in Userdashboard
 class ScanQr extends StatefulWidget {
@@ -53,7 +55,20 @@ class _ScanQrState extends State<ScanQr> {
                   String codeScanned = await BarcodeScanner.scan();
                   setState(() {
                     qrCodeResult = codeScanned;
+                    qrData = qrCodeResult;
                   });
+                  try {
+                    if (qrCodeResult.isNotEmpty) {
+                      Navigator.pushNamed(context, StoreCkechIn.id);
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
+                  // -----------------------
+                  // if (qrCodeResult != null) {
+                  //   StoreCkechIn();
+                  //   // Navigator.pushNamed(context, RegistrationPage.id);
+                  // }
                   // Navigator.pushNamed(context, RegistrationPage.id);
                 },
                 minWidth: 130,
@@ -69,7 +84,134 @@ class _ScanQrState extends State<ScanQr> {
                 height: 55,
               ),
             ),
-            Text(qrCodeResult)
+            // Text(qrData)
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// shop checkin
+//
+class StoreCkechIn extends StatefulWidget {
+  static const String id = 'StoreCheckIn';
+  @override
+  _StoreCkechInState createState() => _StoreCkechInState();
+}
+
+class _StoreCkechInState extends State<StoreCkechIn> {
+  String userName = "";
+  String storeloc = "";
+  String mob = "";
+  String storeName = "";
+
+  Future getDetails() async {
+    final FirebaseUser user = await auth.currentUser();
+    final userid = user.uid;
+    _firestore.collection('store_details').document(qrData).get().then((value) {
+      setState(() {
+        storeName = value.data['store_name'];
+        storeloc = value.data['store_loc'];
+      });
+      // print(value);
+      // print(userName);
+    });
+    _firestore.collection('user_details').document(userid).get().then((value) {
+      setState(() {
+        mob = value.data['contact_no'];
+        userName = value.data['name'];
+      });
+      // print(value);
+      // print(userName);
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getDetails();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 150,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                "Welcome To \n$storeName , $storeloc",
+                style: TextStyle(fontSize: 29, fontWeight: FontWeight.w600),
+              ),
+            ),
+            SizedBox(
+              height: 50,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(25.0),
+              child: Card(
+                color: Colors.blueGrey[300],
+                child: Container(
+                  height: MediaQuery.of(context).size.height * .08,
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.all(22.0),
+                    child: Text(
+                      userName,
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(25.0),
+              child: Card(
+                color: Colors.blueGrey[300],
+                child: Container(
+                  height: MediaQuery.of(context).size.height * .08,
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.all(22.0),
+                    child: Text(
+                      mob,
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(22.0),
+              child: new MaterialButton(
+                onPressed: () async {},
+                minWidth: 130,
+                child: Text(
+                  ' check in  ',
+                  style: TextStyle(fontSize: 17),
+                ),
+                textColor: Colors.white,
+                color: Colors.black87,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: 2,
+                height: 45,
+              ),
+            ),
+            // Card(
+            //   elevation: 5,
+            //   child: Text(data),
+            // ),
           ],
         ),
       ),
@@ -89,6 +231,7 @@ class _HistoryState extends State<History> {
     return Container();
   }
 }
+//logout page
 
 class LogOut extends StatefulWidget {
   @override
@@ -488,7 +631,8 @@ class _ShowQRCodeState extends State<ShowQRCode> {
                       setState(() {
                         _imageFile = image;
                       });
-                      final result = await ImageGallerySaver.saveImage(image);
+                      final result =
+                          await ImageGallerySaver.saveImage(image, quality: 90);
                       // print("captured");
                       // print(result);
                       _save();
@@ -509,7 +653,7 @@ class _ShowQRCodeState extends State<ShowQRCode> {
                 height: 46,
                 minWidth: 130,
                 child: Text(
-                  'Download Qrcode',
+                  'Download QR',
                   style: TextStyle(fontSize: 17),
                 ),
                 textColor: Colors.white,
