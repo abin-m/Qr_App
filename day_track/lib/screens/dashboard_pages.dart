@@ -152,8 +152,7 @@ class _StoreCkechInState extends State<StoreCkechIn> {
           .collection('store_details')
           .document(qrData)
           .collection('CheckIn_details')
-          .document(userid)
-          .setData({
+          .add({
         'customer_name': userName,
         'contact_number': mob,
         'date': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
@@ -274,11 +273,105 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
+  String userid = "";
+  Future getUser() async {
+    final FirebaseUser user = await auth.currentUser();
+
+    setState(() {
+      userid = user.uid;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUser();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(35.0),
+              child: Row(
+                children: [
+                  Text(
+                    "Your CheckIn \nHistory",
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+            ),
+            StreamBuilder(
+                stream: _firestore
+                    .collection('user_details')
+                    .document(userid)
+                    .collection('CheckIn_details')
+                    .orderBy('date')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.blueGrey,
+                      ),
+                    );
+                  }
+                  final details = snapshot.data.documents;
+                  List<CheckinDetails> checkIndetails = [];
+                  for (var i in details) {
+                    final store_name = i.data['store_name'].toString();
+                    final date = i.data['date'].toString();
+                    final time = i.data['time'].toString();
+                    final alldata = CheckinDetails(
+                        storename: store_name, date: date, time: time);
+                    checkIndetails.add(alldata);
+                  }
+                  return Expanded(
+                    child: ListView(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      children: checkIndetails,
+                    ),
+                  );
+                })
+          ],
+        ),
+      ),
+    );
   }
 }
+
+// for checkhistorydetails
+class CheckinDetails extends StatelessWidget {
+  CheckinDetails({this.storename, this.date, this.time});
+  final String storename;
+  final String date;
+  final String time;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Material(
+        borderRadius: BorderRadius.circular(8),
+        elevation: 5.0,
+        color: Color(0xFF0D5A8C),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text(
+            ' Store:  \t$storename\n\n Date :\t$date\n time :\t$time\n ',
+            style: TextStyle(letterSpacing: 1, fontSize: 15),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 //logout page
 
 class LogOut extends StatefulWidget {

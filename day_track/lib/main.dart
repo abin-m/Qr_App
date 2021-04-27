@@ -33,6 +33,7 @@ Future init() async {
 
 void main() {
   runApp(new MaterialApp(
+    theme: ThemeData.fallback(),
     debugShowCheckedModeBanner: false,
     initialRoute: initialRoot,
     routes: {
