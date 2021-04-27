@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+import 'package:day_track/screens/dashboard_user.dart';
 import 'package:day_track/screens/register.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -105,6 +107,20 @@ class _StoreCkechInState extends State<StoreCkechIn> {
   String storeloc = "";
   String mob = "";
   String storeName = "";
+  Future _showAlert(BuildContext context, String message, String action) async {
+    return showDialog(
+        context: context,
+        child: new AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
+          title: new Text(message),
+          actions: <Widget>[
+            new FlatButton(
+                onPressed: () => Navigator.pushNamed(context, UserDashboard.id),
+                child: new Text(action))
+          ],
+        ));
+  }
 
   Future getDetails() async {
     final FirebaseUser user = await auth.currentUser();
@@ -125,6 +141,36 @@ class _StoreCkechInState extends State<StoreCkechIn> {
       // print(value);
       // print(userName);
     });
+  }
+
+  Future checkInData() async {
+    String now = "";
+    final FirebaseUser user = await auth.currentUser();
+    final userid = user.uid;
+    try {
+      _firestore
+          .collection('store_details')
+          .document(qrData)
+          .collection('CheckIn_details')
+          .document(userid)
+          .setData({
+        'customer_name': userName,
+        'contact_number': mob,
+        'date': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
+      });
+      _firestore
+          .collection('user_details')
+          .document(userid)
+          .collection('CheckIn_details')
+          .add({
+        'store_name': storeName,
+        'time': DateFormat("H:m:s").format(DateTime.now()),
+        'date': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
+      });
+      _showAlert(context, 'Succesfully checked In\n Have a nice day ', 'Ok');
+    } catch (e) {
+      _showAlert(context, 'Something went wrong ', 'Ok');
+    }
   }
 
   @override
@@ -194,7 +240,9 @@ class _StoreCkechInState extends State<StoreCkechIn> {
             Padding(
               padding: const EdgeInsets.all(22.0),
               child: new MaterialButton(
-                onPressed: () async {},
+                onPressed: () async {
+                  checkInData();
+                },
                 minWidth: 130,
                 child: Text(
                   ' check in  ',
