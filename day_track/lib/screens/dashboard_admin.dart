@@ -42,7 +42,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
           });
         },
       ),
-      body: SafeArea(child: SingleChildScrollView(child: _pages[index])),
+      body: SafeArea(child: _pages[index]),
     );
   }
 }

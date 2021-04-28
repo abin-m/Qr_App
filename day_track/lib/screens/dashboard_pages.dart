@@ -155,6 +155,7 @@ class _StoreCkechInState extends State<StoreCkechIn> {
           .add({
         'customer_name': userName,
         'contact_number': mob,
+        'time': DateFormat("H:m:s").format(DateTime.now()),
         'date': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
       });
       _firestore
@@ -291,56 +292,54 @@ class _HistoryState extends State<History> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(35.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Your CheckIn \nHistory",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
-                  ),
-                ],
-              ),
+    // return Container();
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(35.0),
+            child: Row(
+              children: [
+                Text(
+                  "Your CheckIn \nHistory",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                ),
+              ],
             ),
-            StreamBuilder(
-                stream: _firestore
-                    .collection('user_details')
-                    .document(userid)
-                    .collection('CheckIn_details')
-                    .orderBy('date')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        backgroundColor: Colors.blueGrey,
-                      ),
-                    );
-                  }
-                  final details = snapshot.data.documents;
-                  List<CheckinDetails> checkIndetails = [];
-                  for (var i in details) {
-                    final store_name = i.data['store_name'].toString();
-                    final date = i.data['date'].toString();
-                    final time = i.data['time'].toString();
-                    final alldata = CheckinDetails(
-                        storename: store_name, date: date, time: time);
-                    checkIndetails.add(alldata);
-                  }
-                  return Expanded(
-                    child: ListView(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                      children: checkIndetails,
+          ),
+          StreamBuilder(
+              stream: _firestore
+                  .collection('user_details')
+                  .document(userid)
+                  .collection('CheckIn_details')
+                  .orderBy('date')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.blueGrey,
                     ),
                   );
-                })
-          ],
-        ),
+                }
+                final details = snapshot.data.documents;
+                List<CheckinDetails> checkIndetails = [];
+                for (var i in details) {
+                  final storename = i.data['store_name'].toString();
+                  final date = i.data['date'].toString();
+                  final time = i.data['time'].toString();
+                  final alldata = CheckinDetails(
+                      storename: storename, date: date, time: time);
+                  checkIndetails.add(alldata);
+                }
+                return Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                    children: checkIndetails,
+                  ),
+                );
+              })
+        ],
       ),
     );
   }
@@ -587,9 +586,124 @@ class VistorsDetails extends StatefulWidget {
 }
 
 class _VistorsDetailsState extends State<VistorsDetails> {
+  String userid = "";
+  Future getUser() async {
+    final FirebaseUser user = await auth.currentUser();
+
+    setState(() {
+      userid = user.uid;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUser();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(35.0),
+              child: Row(
+                children: [
+                  Text(
+                    "Visitors \nHistory",
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+            ),
+            StreamBuilder(
+                stream: _firestore
+                    .collection('store_details')
+                    .document(userid)
+                    .collection('CheckIn_details')
+                    .orderBy('date')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.blueGrey,
+                      ),
+                    );
+                  }
+                  print('Y Uid $userid');
+                  final details = snapshot.data.documents;
+                  List<UserCheckinDetails> checkIndetails = [];
+                  for (var i in details) {
+                    final username = i.data['customer_name'].toString();
+                    final date = i.data['date'].toString();
+                    final time = i.data['time'].toString();
+                    final contact = i.data['contact_number'].toString();
+                    final alldata = UserCheckinDetails(
+                      username: username,
+                      date: date,
+                      time: time,
+                      contact: contact,
+                    );
+                    checkIndetails.add(alldata);
+                  }
+                  return Expanded(
+                    child: ListView(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      children: checkIndetails,
+                    ),
+                  );
+                })
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// for visitorshistorydetails
+// class ViewCustomersHistory extends StatelessWidget {
+//   ViewCustomersHistory({this.username,this.time,this.date});
+//   final String username;
+//   final String date;
+//   final String time;
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+
+//     );
+//   }
+// }
+
+class UserCheckinDetails extends StatelessWidget {
+  UserCheckinDetails({this.username, this.date, this.time, this.contact});
+  final String username;
+  final String date;
+  final String time;
+  final contact;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Material(
+        borderRadius: BorderRadius.circular(8),
+        elevation: 5.0,
+        color: Color(0xFF0D5A5C),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            ' Customer:  \t$username\n\n contact :\t$contact\n Date :\t$date\n time :\t$time\n ',
+            style: TextStyle(letterSpacing: 1, fontSize: 15),
+          ),
+        ),
+      ),
+    );
   }
 }
 
