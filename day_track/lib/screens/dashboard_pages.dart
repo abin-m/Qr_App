@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:day_track/screens/dashboard_user.dart';
 import 'package:day_track/screens/register.dart';
 import 'package:intl/intl.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -293,53 +294,60 @@ class _HistoryState extends State<History> {
   @override
   Widget build(BuildContext context) {
     // return Container();
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(35.0),
-            child: Row(
-              children: [
-                Text(
-                  "Your CheckIn \nHistory",
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Your CheckIn \nHistory",
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          StreamBuilder(
-              stream: _firestore
-                  .collection('user_details')
-                  .document(userid)
-                  .collection('CheckIn_details')
-                  .orderBy('date')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.blueGrey,
+            StreamBuilder(
+                stream: _firestore
+                    .collection('user_details')
+                    .document(userid)
+                    .collection('CheckIn_details')
+                    .orderBy('time')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.blueGrey,
+                      ),
+                    );
+                  }
+                  final details = snapshot.data.documents;
+                  List<CheckinDetails> checkIndetails = [];
+                  for (var i in details) {
+                    final storename = i.data['store_name'].toString();
+                    final date = i.data['date'].toString();
+                    final time = i.data['time'].toString();
+                    final alldata = CheckinDetails(
+                        storename: storename, date: date, time: time);
+                    checkIndetails.add(alldata);
+                  }
+                  return Expanded(
+                    child: ListView(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      children: checkIndetails,
                     ),
                   );
-                }
-                final details = snapshot.data.documents;
-                List<CheckinDetails> checkIndetails = [];
-                for (var i in details) {
-                  final storename = i.data['store_name'].toString();
-                  final date = i.data['date'].toString();
-                  final time = i.data['time'].toString();
-                  final alldata = CheckinDetails(
-                      storename: storename, date: date, time: time);
-                  checkIndetails.add(alldata);
-                }
-                return Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                    children: checkIndetails,
-                  ),
-                );
-              })
-        ],
+                })
+          ],
+        ),
       ),
     );
   }
@@ -636,7 +644,7 @@ class _VistorsDetailsState extends State<VistorsDetails> {
                       ),
                     );
                   }
-                  print('Y Uid $userid');
+                  // print('Y Uid $userid');
                   final details = snapshot.data.documents;
                   List<UserCheckinDetails> checkIndetails = [];
                   for (var i in details) {
@@ -698,9 +706,12 @@ class UserCheckinDetails extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            ' Customer:  \t$username\n\n contact :\t$contact\n Date :\t$date\n time :\t$time\n ',
-            style: TextStyle(letterSpacing: 1, fontSize: 15),
-          ),
+              ' Customer:  \t$username\n\n contact :\t$contact\n Date :\t$date\n time :\t$time\n ',
+              style: TextStyle(
+                letterSpacing: 1,
+                fontSize: 15,
+                color: Colors.white,
+              )),
         ),
       ),
     );
@@ -715,9 +726,163 @@ class SearchByDate extends StatefulWidget {
 }
 
 class _SearchByDateState extends State<SearchByDate> {
+  var _value;
+  String userid = "";
+  Future getUser() async {
+    final FirebaseUser user = await auth.currentUser();
+
+    setState(() {
+      userid = user.uid;
+      // _value = new DateTime.now();
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUser();
+  }
+
+  Future<Null> _selectDate() async {
+    print(DateTime.now());
+    DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: new DateTime.now(),
+      firstDate: new DateTime(2000),
+      lastDate: new DateTime(2123),
+      initialEntryMode: DatePickerEntryMode.calendar,
+      // fieldHintText: 'DD/MM/YYYY',
+      errorFormatText: 'Enter valid date',
+      errorInvalidText: 'Enter date in valid range',
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark(), // This will change to light theme.
+          child: child,
+        );
+      },
+    );
+
+    if (picked != null)
+      setState(() => _value = DateFormat("dd-MM-yyyy").format(picked));
+  }
+
+  bool showspinner = false;
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return ModalProgressHUD(
+      inAsyncCall: showspinner,
+      child: Scaffold(
+        body: SafeArea(
+            child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 35,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(13.0),
+              child: Text(
+                "Search by Date",
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+              ),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                // child: RaisedButton(
+                //   onPressed: _selectDate,
+                //   child: Text("select a date"),
+                // ),
+                child: OutlineButton(
+                  color: Colors.black,
+                  highlightedBorderColor: Colors.black,
+                  disabledBorderColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100)),
+                  padding: EdgeInsets.all(18),
+                  onPressed: _selectDate,
+                  child: Text('Select Date'),
+                ),
+              ),
+            ),
+            StreamBuilder(
+                stream: _firestore
+                    .collection('store_details')
+                    .document(userid)
+                    .collection('CheckIn_details')
+                    .where('date', isEqualTo: _value)
+                    .orderBy('date')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Padding(
+                      padding: const EdgeInsets.all(13.0),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.blueGrey,
+                        ),
+                      ),
+                    );
+                  }
+                  // print('Y Uid $userid');
+                  final details = snapshot.data.documents;
+                  List<Searching> searchResult = [];
+                  for (var i in details) {
+                    final username = i.data['customer_name'].toString();
+                    final date = i.data['date'].toString();
+                    final time = i.data['time'].toString();
+                    final contact = i.data['contact_number'].toString();
+                    final alldata = Searching(
+                      username: username,
+                      date: date,
+                      time: time,
+                      contact: contact,
+                    );
+                    searchResult.add(alldata);
+                  }
+                  return Expanded(
+                    child: ListView(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      children: searchResult,
+                    ),
+                  );
+                })
+          ],
+        )),
+      ),
+    );
+  }
+}
+
+//  for searching
+//
+class Searching extends StatelessWidget {
+  Searching({this.username, this.date, this.time, this.contact});
+  final String username;
+  final String date;
+  final String time;
+  final contact;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Material(
+        borderRadius: BorderRadius.circular(8),
+        elevation: 5.0,
+        color: Color(0xFF0D5A5C),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+              ' Customer:  \t$username\n\n contact :\t$contact\n Date :\t$date\n time :\t$time\n ',
+              style: TextStyle(
+                letterSpacing: 1,
+                fontSize: 15,
+                color: Colors.white,
+              )),
+        ),
+      ),
+    );
   }
 }
 

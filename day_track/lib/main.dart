@@ -7,6 +7,7 @@ import 'package:day_track/screens/store_registration.dart';
 import 'package:day_track/screens/welcomscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 import 'dart:io';
 
 SharedPreferences localStorage;
