@@ -13,7 +13,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 //**************These Pages are used in the bottom navigation bar*********************** */
+SharedPreferences localStorage;
 
 final auth = FirebaseAuth.instance;
 final _firestore = Firestore.instance;
@@ -110,17 +113,25 @@ class _StoreCkechInState extends State<StoreCkechIn> {
   String storeName = "";
   Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
-        context: context,
-        child: new AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
-          title: new Text(message),
-          actions: <Widget>[
-            new FlatButton(
-                onPressed: () => Navigator.pushNamed(context, UserDashboard.id),
-                child: new Text(action))
-          ],
-        ));
+        builder: (context) => new AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(19)),
+              title: new Text(message),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                new FlatButton(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, UserDashboard.id),
+                    child: new Text(
+                      action,
+                      style: TextStyle(
+                          color: Colors.green[700],
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700),
+                    ))
+              ],
+            ),
+        context: context);
   }
 
   Future getDetails() async {
@@ -168,7 +179,8 @@ class _StoreCkechInState extends State<StoreCkechIn> {
         'time': DateFormat("H:m:s").format(DateTime.now()),
         'date': now = DateFormat("dd-MM-yyyy").format(DateTime.now()),
       });
-      _showAlert(context, 'Succesfully checked In\n Have a nice day ', 'Ok');
+      _showAlert(context,
+          'successfully checked In🎉🎉\n \n\nHave a nice day 💓', 'Ok');
     } catch (e) {
       _showAlert(context, 'Something went wrong ', 'Ok');
     }
@@ -318,7 +330,7 @@ class _HistoryState extends State<History> {
                     .collection('user_details')
                     .document(userid)
                     .collection('CheckIn_details')
-                    .orderBy('time')
+                    .orderBy('date')
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -393,6 +405,7 @@ class _LogOutState extends State<LogOut> {
   Future getDetails() async {
     final FirebaseUser user = await auth.currentUser();
     final userid = user.uid;
+    // var obtainedUid = localStorage.getString('uid');
     _firestore.collection('user_details').document(userid).get().then((value) {
       setState(() {
         kUid = userid;
@@ -440,8 +453,14 @@ class _LogOutState extends State<LogOut> {
               padding: const EdgeInsets.all(28.0),
               child: new MaterialButton(
                 onPressed: () {
+                  // localStorage.setBool('login', true);
                   auth.signOut();
-                  Navigator.pushNamed(context, Loginpage.id);
+// this type of navigator used to avoid back slash
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => Loginpage()),
+                    (Route<dynamic> route) => false,
+                  );
                 },
                 height: 46,
                 minWidth: 130,
@@ -476,6 +495,7 @@ class _StoreLogOutState extends State<StoreLogOut> {
   Future getDetails() async {
     final FirebaseUser user = await auth.currentUser();
     final userid = user.uid;
+    // var obtainedUid = localStorage.getString('uid');
     _firestore.collection('store_details').document(userid).get().then((value) {
       setState(() {
         kUid = userid;
@@ -524,7 +544,11 @@ class _StoreLogOutState extends State<StoreLogOut> {
               child: new MaterialButton(
                 onPressed: () {
                   auth.signOut();
-                  Navigator.pushNamed(context, Loginpage.id);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => Loginpage()),
+                    (Route<dynamic> route) => false,
+                  );
                 },
                 height: 46,
                 minWidth: 130,
@@ -793,6 +817,7 @@ class _SearchByDateState extends State<SearchByDate> {
                 //   onPressed: _selectDate,
                 //   child: Text("select a date"),
                 // ),
+                // ignore: deprecated_member_use
                 child: OutlineButton(
                   color: Colors.black,
                   highlightedBorderColor: Colors.black,
@@ -912,17 +937,24 @@ class _ShowQRCodeState extends State<ShowQRCode> {
   String kUid = "";
   Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
-        context: context,
-        child: new AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
-          title: new Text(message),
-          actions: <Widget>[
-            new FlatButton(
-                onPressed: () => Navigator.pop(context),
-                child: new Text(action))
-          ],
-        ));
+        builder: (context) => new AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(19)),
+              title: new Text(message),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                new FlatButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: new Text(
+                      action,
+                      style: TextStyle(
+                          color: Colors.green[700],
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700),
+                    ))
+              ],
+            ),
+        context: context);
   }
 
   _save() async {
@@ -1059,10 +1091,7 @@ class _ShowQRCodeState extends State<ShowQRCode> {
                     }).catchError((onError) {
                       print(onError);
                     });
-                    _showAlert(
-                        context,
-                        "File saved on your Gallery,take a print out of that and paste that at your entrance",
-                        "Ok");
+                    _showAlert(context, "File saved on your Gallery 🎊", "Ok");
                   } catch (e) {
                     _showAlert(context, "An error occured ", "Try again");
                   }
@@ -1101,16 +1130,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   String email;
   Future _showAlert(BuildContext context, String message) async {
     return showDialog(
-        context: context,
-        child: new AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
-          title: new Text(message),
-          actions: <Widget>[
-            new FlatButton(
-                onPressed: () => Navigator.pop(context), child: new Text('OK'))
-          ],
-        ));
+        builder: (context) => new AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(19)),
+              title: new Text(message),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                new FlatButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: new Text('OK'))
+              ],
+            ),
+        context: context);
   }
 
   @override

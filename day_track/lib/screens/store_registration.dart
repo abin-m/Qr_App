@@ -21,17 +21,18 @@ class _StoreregistrationState extends State<Storeregistration> {
 
   Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
-        context: context,
-        child: new AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
-          title: new Text(message),
-          actions: <Widget>[
-            new FlatButton(
-                onPressed: () => Navigator.pop(context),
-                child: new Text(action))
-          ],
-        ));
+        builder: (context) => new AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(19)),
+              title: new Text(message),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                new FlatButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: new Text(action))
+              ],
+            ),
+        context: context);
   }
 
   bool spinner = false;

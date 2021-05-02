@@ -22,17 +22,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   Future _showAlert(BuildContext context, String message, String action) async {
     return showDialog(
-        context: context,
-        child: new AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
-          title: new Text(message),
-          actions: <Widget>[
-            new FlatButton(
-                onPressed: () => Navigator.pop(context),
-                child: new Text(action))
-          ],
-        ));
+        builder: (context) => new AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(19)),
+              title: new Text(message),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                new FlatButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: new Text(action))
+              ],
+            ),
+        context: context);
   }
 
   String now;
@@ -158,6 +159,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 },
                 decoration: new InputDecoration(
                   labelText: 'Password',
+                  hintText: 'Atleast 6 characters',
                   fillColor: Colors.white,
                   border: new OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
@@ -171,6 +173,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     return null;
                   }
                 },
+                obscureText: true,
                 keyboardType: TextInputType.visiblePassword,
               ),
               SizedBox(height: 20),

@@ -24,17 +24,18 @@ class _LoginpageState extends State<Loginpage> {
 
   Future _showAlert(BuildContext context, String message) async {
     return showDialog(
-        context: context,
-        child: new AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
-          title: new Text(message),
-          actions: <Widget>[
-            new FlatButton(
-                onPressed: () => Navigator.pop(context),
-                child: new Text('Cancel'))
-          ],
-        ));
+        builder: (context) => new AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(19)),
+              title: new Text(message),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                new FlatButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: new Text('Cancel'))
+              ],
+            ),
+        context: context);
   }
 
   //SHARED PREFERENCES INITIALIZATION
@@ -173,11 +174,16 @@ class _LoginpageState extends State<Loginpage> {
                             print(e);
                           }
                           // Navigator.pushNamed(context, UserDashboard.id);
-                          localStorage.setString('Email', email);
-                          var obtainedEmail = localStorage.getString('Email');
-                          print("obtained Email:${obtainedEmail}");
+                          // localStorage.setString('Email', email);
+                          setState(() {
+                            localStorage.setBool('login', false);
+                            localStorage.setString('uid', userid);
+                          });
+
+                          var uid = localStorage.getString('uid');
+                          // var obtainedEmail = localStorage.getString('Email');
+                          print("obtained Email:$uid");
                           // localStorage.setString('password', password);
-                          // localStorage.setString('uid', userid);
 
                         }
                       } catch (e) {

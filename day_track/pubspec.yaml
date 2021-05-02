@@ -40,6 +40,7 @@ dependencies:
   screenshot: ^0.3.0
   image_gallery_saver: '^1.5.0'
   permission_handler: ^5.1.0+2
+  intl: ^0.17.0
   
 
 dev_dependencies:

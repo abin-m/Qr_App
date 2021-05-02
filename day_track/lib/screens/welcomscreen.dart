@@ -4,6 +4,11 @@ import 'package:day_track/screens/register.dart';
 import 'package:day_track/screens/store_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dashboard_admin.dart';
+
+String storedUid;
 
 class Welcomescreen extends StatefulWidget {
   static const String id = 'Welcome_Screen';
@@ -12,6 +17,54 @@ class Welcomescreen extends StatefulWidget {
 }
 
 class _WelcomescreenState extends State<Welcomescreen> {
+  final auth = FirebaseAuth.instance;
+  final _firestore = Firestore.instance;
+  SharedPreferences localStorage;
+  String finalpass;
+  var initialRoot = Welcomescreen.id;
+
+// shared preferences initialization
+
+  Future init() async {
+    localStorage = await SharedPreferences.getInstance();
+    // var obtainedEmail = localStorage.getString('Email');
+    var obtainedUid = localStorage.getString('uid');
+    print('Obtained passs:?$obtainedUid');
+    setState(() {
+      storedUid = obtainedUid;
+    });
+    finalpass = obtainedUid;
+
+    print(finalpass);
+    if (finalpass == null) {
+      Navigator.pushNamed(context, Loginpage.id);
+      // initialRoot = Loginpage.id;
+    } else {
+      // initialRoot = UserDashboard.id;
+      try {
+        DocumentSnapshot snap = await _firestore
+            .collection('store_details')
+            .document(obtainedUid)
+            .get();
+
+        if (snap.exists) {
+          // print('nadakkula mwone');
+          Navigator.pushNamed(context, StoreDashboard.id);
+        } else {
+          Navigator.pushNamed(context, UserDashboard.id);
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    init();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
